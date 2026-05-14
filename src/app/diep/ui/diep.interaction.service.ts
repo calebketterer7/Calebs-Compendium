@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { DiepGameEngineService } from '../engine/diep.game-engine.service';
 import { DiepButton } from '../core/diep.interfaces';
-import { DiepQuadriviumMenu } from './quadrivium/diep.quadrivium-menu';
-import { DiepAchievementMenu } from './achievements/diep.achievement-menu';
-import { DiepAchievementNavigator } from './achievements/diep.achievement-nav-bar';
+import { DiepQuadriviumMenu } from './main-menu/quadrivium/diep.quadrivium-menu';
+import { DiepAchievementMenu } from './main-menu/achievements/diep.achievement-menu';
+import { DiepAchievementNavigator } from './main-menu/achievements/diep.achievement-nav-bar';
 import { DiepMainMenu } from './main-menu/diep.main-menu';
 import { DiepPauseOverlay } from './overlays/pause-overlay';
 import { DiepGameOverOverlay } from './overlays/game-over-overlay';

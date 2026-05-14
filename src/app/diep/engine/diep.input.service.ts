@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { DiepGameEngineService } from './diep.game-engine.service';
 import { DiepInteractionService } from '../ui/diep.interaction.service';
-import { DiepQuadriviumMenu } from '../ui/quadrivium/diep.quadrivium-menu';
-import { DiepAchievementMenu } from '../ui/achievements/diep.achievement-menu';
+import { DiepQuadriviumMenu } from '../ui/main-menu/quadrivium/diep.quadrivium-menu';
+import { DiepAchievementMenu } from '../ui/main-menu/achievements/diep.achievement-menu';
 import { DiepDynamicTitle } from '../ui/main-menu/diep.dynamic-title';
 import { DiepTipsManager } from '../ui/main-menu/diep.tips-manager';
 

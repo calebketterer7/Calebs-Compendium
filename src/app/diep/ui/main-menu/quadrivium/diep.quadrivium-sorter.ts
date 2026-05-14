@@ -1,5 +1,5 @@
-import { EnemyRegistry } from '../../enemies/enemy.registry';
-import { EnemyType } from '../../core/diep.interfaces';
+import { EnemyRegistry } from '../../../enemies/enemy.registry';
+import { EnemyType } from '../../../core/diep.interfaces';
 
 export class QuadriviumSorter {
   // Define the Priority of Factions (ROYGBIV)

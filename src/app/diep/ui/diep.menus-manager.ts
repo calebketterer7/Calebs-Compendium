@@ -1,5 +1,5 @@
-import { DiepQuadriviumMenu } from './quadrivium/diep.quadrivium-menu';
-import { DiepAchievementMenu } from './achievements/diep.achievement-menu';
+import { DiepQuadriviumMenu } from './main-menu/quadrivium/diep.quadrivium-menu';
+import { DiepAchievementMenu } from './main-menu/achievements/diep.achievement-menu';
 import { DiepMainMenu } from './main-menu/diep.main-menu';
 import { DiepPauseOverlay } from './overlays/pause-overlay';
 import { DiepGameOverOverlay } from './overlays/game-over-overlay';

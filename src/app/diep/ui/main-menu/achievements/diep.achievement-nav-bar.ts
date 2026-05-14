@@ -1,4 +1,4 @@
-import { Achievement, DiepButton } from '../../core/diep.interfaces';
+import { Achievement, DiepButton } from '../../../core/diep.interfaces';
 
 export class DiepAchievementNavigator {
   public static groups: string[] = ['ALL'];

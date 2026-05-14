@@ -1,4 +1,4 @@
-import { Achievement } from '../../core/diep.interfaces';
+import { Achievement } from '../../../core/diep.interfaces';
 
 export class AchievementCardRenderer {
   public static drawEntry(
