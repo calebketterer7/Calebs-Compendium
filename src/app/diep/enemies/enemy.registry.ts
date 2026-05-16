@@ -14,6 +14,7 @@ import { BomberEnemy } from './orange/bomber.enemy';
 import { BlasterEnemy } from './orange/blaster.enemy';
 import { CasterEnemy } from './blue/caster.enemy';
 import { EchoEnemy } from './blue/echo.enemy';
+import { FloaterEnemy } from './green/floater.enemy';
 
 /**
  * The EnemyRegistry acts as the central "Switchboard".
@@ -40,6 +41,7 @@ export class EnemyRegistry {
     'BLASTER' : BlasterEnemy,
     'CASTER' : CasterEnemy,
     'ECHO' : EchoEnemy,
+    'FLOATER' : FloaterEnemy,
   };
 
   /**
@@ -87,13 +89,15 @@ export class EnemyRegistry {
 
   /**
    * Delegates the update logic to the specific enemy file.
+   * Modified signature slightly to accept and pass through the full enemy list.
    */
   public static update(
     enemy: Enemy, 
     player: Player, 
     bullets: Bullet[], 
     deltaTime: number, 
-    currentTime: number
+    currentTime: number,
+    allEnemies: Enemy[] = [] // Optional fallback param so it doesn't break other calling services
   ): void {
     const handler = this.getHandler(enemy.type);
     
@@ -103,7 +107,8 @@ export class EnemyRegistry {
       deltaTime, 
       currentTime, 
       this.moveTowardsTarget.bind(this), 
-      bullets
+      bullets,
+      allEnemies
     );
   }
 

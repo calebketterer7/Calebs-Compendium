@@ -32,7 +32,10 @@ export class DiepEnemyService {
     }
 
     public updateAI(enemies: Enemy[], bullets: Bullet[], player: Player, deltaTime: number, width: number, height: number) {
-        enemies.forEach(enemy => enemy.onUpdate?.(enemy, player, deltaTime));
+        enemies.forEach(enemy => {
+            (enemy as any).allEnemies = enemies;
+            enemy.onUpdate?.(enemy, player, deltaTime);
+        });
         DiepEnemyLogic.updateAllEnemies(enemies, bullets, player, deltaTime, width, height, performance.now());
     }
 

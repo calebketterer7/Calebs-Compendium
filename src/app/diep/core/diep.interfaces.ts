@@ -61,7 +61,7 @@ export interface Bullet {
   isGhost?: boolean;
 }
 
-export type EnemyType = 'ROLLER' | 'MINION' | 'CRASHER' | 'SNIPER' | 'BLOATER' | 'SMASHER' | 'GUNNER' | 'MOTHER'| 'HEALER' | 'PUDDLE'| 'HAUNTER' |'BOMBER'| 'BLASTER'| 'CASTER'| 'ECHO';
+export type EnemyType = 'ROLLER' | 'MINION' | 'CRASHER' | 'SNIPER' | 'BLOATER' | 'SMASHER' | 'GUNNER' | 'MOTHER'| 'HEALER' | 'PUDDLE'| 'HAUNTER' |'BOMBER'| 'BLASTER'| 'CASTER'| 'ECHO' | 'FLOATER';
 
 export interface Enemy {
   id: string;
