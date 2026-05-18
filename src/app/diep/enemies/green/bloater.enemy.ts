@@ -29,6 +29,7 @@ export class BloaterEnemy {
             health: size * 5,
             maxHealth: size * 5,
             scoreValue: size,
+            type: 'BLOATER',
             speedMultiplier: this.CONFIG.baseSpeed,
             state: {
                 ['trails']: [] as TrailSegment[],
@@ -72,14 +73,10 @@ export class BloaterEnemy {
         }
 
         // 2. ENCAPSULATED PRE-EMPTIVE COLLISION CHECK
-        // Calculate the distance on *this* frame. If the engine's updateAI physics loop 
-        // is about to push us away, we intercept and detonate immediately right here.
         const dx = player.x - enemy.x;
         const dy = player.y - enemy.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
         
-        // Using an explicit padding threshold (radius sum + 8px) to catch the entity 
-        // even if the engine's hardcoded knockback already altered its position variables mid-tick
         if (dist < (enemy.radius + player.radius + 8) && enemy.health > 0) {
             this.executeSuicideRam(player, allEnemies, enemy);
             return;
@@ -219,18 +216,12 @@ export class BloaterEnemy {
         }
     }
 
-    /**
-     * Executes the Mutually Assured Destruction sequence when touching the player.
-     * Instantly damages player based on total size mass and prunes the TEMPORARY from the active frame pool.
-     */
     private static executeSuicideRam(player: Player, allEnemies: Enemy[], enemy: Enemy): void {
         const ramDamage = enemy.radius * 2.5; 
         player.health -= ramDamage;
 
-        // Instantly zero out health so standard engine loops treat it as dead
         enemy.health = 0;
 
-        // Splice immediately from active enemy arrays to break out of the engine's global loop tracking
         const index = allEnemies.indexOf(enemy);
         if (index > -1) {
             allEnemies.splice(index, 1);
@@ -244,9 +235,10 @@ export class BloaterEnemy {
     }
 
     public static draw(ctx: CanvasRenderingContext2D, enemy: Enemy): void {
-        const state = enemy.state!;
-        const trails = state['trails'] as TrailSegment[];
+        const state = enemy.state;
+        const trails = state ? (state['trails'] as TrailSegment[]) : null;
 
+        // 1. DRAW TRAILS (Standard smooth circles trailing behind)
         if (trails) {
             ctx.save();
             for (const t of trails) {
@@ -259,12 +251,41 @@ export class BloaterEnemy {
             ctx.restore();
         }
 
+        // 2. DRAW BIO-MEMBRANE WOBBLE BODY EFFECT
+        ctx.save();
         ctx.beginPath();
-        ctx.arc(enemy.x, enemy.y, enemy.radius, 0, Math.PI * 2);
+
+        const timestamp = Date.now();
+        // Control frequency and intensity of the outer flesh shifting
+        const wobbleSpeed = timestamp * 0.004; 
+        const waveCount = 8; // Number of ripples around the body
+        const maxWobbleAmplitude = Math.max(2, enemy.radius * 0.08); // Wobble scales up with body size
+
+        // Trace a distorted path utilizing micro-offsets at 60 points around the circle
+        for (let i = 0; i <= 60; i++) {
+            const angle = (Math.PI * 2 * i) / 60;
+            
+            // Layer a fast wave onto a slow wave to simulate a fluid, uneven shifting texture
+            const waveOffset = Math.sin(angle * waveCount + wobbleSpeed) * Math.cos(angle * 3 - wobbleSpeed * 0.5);
+            const dynamicRadius = enemy.radius + waveOffset * maxWobbleAmplitude;
+
+            const wx = enemy.x + dynamicRadius * Math.cos(angle);
+            const wy = enemy.y + dynamicRadius * Math.sin(angle);
+
+            if (i === 0) {
+                ctx.moveTo(wx, wy);
+            } else {
+                ctx.lineTo(wx, wy);
+            }
+        }
+
+        ctx.closePath();
         ctx.fillStyle = enemy.color;
         ctx.fill();
+
         ctx.strokeStyle = '#88B344';
         ctx.lineWidth = 4;
         ctx.stroke();
+        ctx.restore();
     }
 }
