@@ -11,7 +11,7 @@ import { TransitionManager } from '../ui/diep.transition-manager';
 import { AchievementService } from '../core/diep.achievement.service';
 import { DiepPlayerUpgradesService } from './subsystems/player-upgrades/diep.player-upgrades.service';
 import { DiepArenaManager } from './subsystems/diep.arena-manager';
-import { DiepHazardDirector } from './subsystems/diep.hazard-director.service';
+import { DiepFloorDirector } from './subsystems/diep.arena-floor-director.service';
 import { DiepTimeManager } from '../core/diep.time-manager';
 
 @Injectable({ providedIn: 'root' })
@@ -62,7 +62,7 @@ export class DiepGameEngineService {
         public achievementService: AchievementService,
         private upgradeService: DiepPlayerUpgradesService,
         public arenaManager: DiepArenaManager,
-        public hazardDirector: DiepHazardDirector,
+        public hazardDirector: DiepFloorDirector,
     ) {
         this.player = this.playerService.getDefaultPlayer(this.currentDifficulty, this.persistentXp);
         this.topScores = this.highScoresService.getHighScores();

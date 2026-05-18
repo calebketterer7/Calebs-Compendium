@@ -5,7 +5,7 @@ import { DiepWaveManagerService } from './diep.wave-manager';
 type ArenaPattern = 'NONE' | 'CHAOS' | 'CENTER_PIT' | 'VERTICAL_STRIPES' | 'RANDOM_MAZE' | 'VOID_POCKETS';
 
 @Injectable({ providedIn: 'root' })
-export class DiepHazardDirector {
+export class DiepFloorDirector {
   private updateTimer = 0;
   private currentPattern: ArenaPattern = 'NONE';
   private lastWaveProcessed = -1;
