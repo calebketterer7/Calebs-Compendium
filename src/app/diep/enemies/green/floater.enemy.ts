@@ -20,42 +20,39 @@ export class FloaterEnemy {
             maxHealth: (randomBodySize * 4),
             scoreValue: (randomBodySize * 2),
             type: 'FLOATER',
-            isPassive: false, 
+            isPassive: true, 
             onSpawn: (enemy: any, canvasWidth: number, canvasHeight: number) => {
-                enemy.targetX = Math.random() * canvasWidth;
-                enemy.targetY = Math.random() * canvasHeight;
+                const margin = randomBodySize + 100;
+                const width = canvasWidth > 0 ? canvasWidth : 1600;
+                const height = canvasHeight > 0 ? canvasHeight : 900;
+
+                // Safely anchor initial targeting inside known parameters
+                enemy.targetX = margin + Math.random() * (width - margin * 2);
+                enemy.targetY = margin + Math.random() * (height - margin * 2);
+                enemy.speedModifier = 0.5;
             },
             onUpdate: (enemy: any, player: Player, deltaTime: number) => {
-                if (enemy.deathTimer !== undefined) {
-                    enemy.deathTimer -= deltaTime;
-                    if (enemy.deathTimer <= 0) enemy.health = 0;
-                    return;
-                }
-
+                const tick = deltaTime / 16.66;
+                
+                // Toxic aura distance calculation
                 const dx = enemy.x - player.x;
                 const dy = enemy.y - player.y;
                 if (Math.sqrt(dx * dx + dy * dy) < enemy.radius + toxicRange) {
-                    player.health -= 0.5 * (deltaTime / 16.66);
+                    player.health -= 0.5 * tick;
                 }
             },
             onHit: (enemies: Enemy[], _spawner: any, bullet: Bullet) => {
                 FloaterEnemy.spawnPuddleLogic(enemies, bullet.x, bullet.y, randomBodySize);
             },
             onDeath: (enemies: Enemy[], spawner: any, deadEnemy: any) => {
-                if (deadEnemy.deathTimer === undefined) {
-                    deadEnemy.isPassive = true;          
-                    deadEnemy.deathTimer = 350;  
-                    deadEnemy.health = 1;                 
-                    
-                    const puddleCount = Math.floor(Math.random() * 4) + 5;
-                    for (let i = 0; i < puddleCount; i++) {
-                        FloaterEnemy.spawnPuddleLogic(
-                            enemies, 
-                            deadEnemy.x + (Math.random() - 0.5) * 160, 
-                            deadEnemy.y + (Math.random() - 0.5) * 160, 
-                            deadEnemy.radius
-                        );
-                    }
+                const puddleCount = Math.floor(Math.random() * 4) + 5;
+                for (let i = 0; i < puddleCount; i++) {
+                    FloaterEnemy.spawnPuddleLogic(
+                        enemies, 
+                        deadEnemy.x + (Math.random() - 0.5) * 160, 
+                        deadEnemy.y + (Math.random() - 0.5) * 160, 
+                        deadEnemy.radius
+                    );
                 }
             }
         };
@@ -85,19 +82,40 @@ export class FloaterEnemy {
     }
 
     public static update(enemy: Enemy, player: Player, deltaTime: number, currentTime: number, moveTowards: Function): void {
-        if ((enemy as any).deathTimer !== undefined) return;
-        const tx = (enemy as any).targetX ?? enemy.x;
-        const ty = (enemy as any).targetY ?? enemy.y;
-        moveTowards(enemy, deltaTime, tx, ty, (tx === enemy.x && ty === enemy.y) ? 0 : 0.5);
+        const e = enemy as any;
+        const tx = e.targetX ?? enemy.x;
+        const ty = e.targetY ?? enemy.y;
+
+        const distDx = tx - enemy.x;
+        const distDy = ty - enemy.y;
+        const distanceToTarget = Math.sqrt(distDx * distDx + distDy * distDy);
+
+        // Explicitly tie arena scale context to engine updates if possible, or fall back to predictable baseline bounds
+        // Changed static window values to match baseline coordinates used by functional entities like Blaster Enemy
+        const areaWidth = 800;  
+        const areaHeight = 600; 
+        const safePadding = enemy.radius + 40; 
+
+        if (e.targetX === undefined || distanceToTarget < enemy.radius + 20) {
+            e.targetX = safePadding + Math.random() * (areaWidth - safePadding * 2);
+            e.targetY = safePadding + Math.random() * (areaHeight - safePadding * 2);
+        }
+
+        // Biological movement personality pulsing calculation
+        const speedCycleTime = currentTime / 1200; 
+        e.speedModifier = 0.2 + (Math.sin(speedCycleTime) * Math.cos(speedCycleTime * 0.5) + 1) * 0.45;
+
+        const activeSpeed = (tx === enemy.x && ty === enemy.y) ? 0 : e.speedModifier;
+        moveTowards(enemy, deltaTime, e.targetX, e.targetY, activeSpeed);
     }
 
     public static draw(ctx: CanvasRenderingContext2D, enemy: Enemy): void {
         const timeFactor = Date.now();
-        const tx = (enemy as any).targetX ?? enemy.x;
-        const ty = (enemy as any).targetY ?? enemy.y;
+        const isPuddle = (enemy.isGhost || enemy.isPassive) && (enemy as any).spawnTime !== undefined;
 
-        if (tx === enemy.x && ty === enemy.y) {
-            const rem = (enemy as any).lifespan - (timeFactor - (enemy as any).spawnTime);
+        if (isPuddle) {
+            const age = timeFactor - (enemy as any).spawnTime;
+            const rem = (enemy as any).lifespan - age;
             let r = enemy.radius + Math.sin(timeFactor / 400) * 2;
             if (rem < 1500) r *= Math.max(0, rem / 1500);
 
@@ -115,29 +133,16 @@ export class FloaterEnemy {
             return;
         }
 
-        if ((enemy as any).deathTimer !== undefined) {
-            const p = (350 - (enemy as any).deathTimer) / 350; 
-            ctx.save();
-            ctx.beginPath();
-            ctx.arc(enemy.x, enemy.y, enemy.radius * (1 + p * 0.6), 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(0, 230, 115, ${(1 - p) * 0.7})`;
-            ctx.fill();
-            
-            ctx.fillStyle = `rgba(0, 230, 115, ${1 - p})`;
-            const dist = enemy.radius * (0.45 + p * 1.8);
-            for (let i = 0; i < 6; i++) {
-                const a = (Math.PI * 2 * i) / 6 + (p * 1.5);
-                ctx.beginPath();
-                ctx.arc(enemy.x + dist * Math.cos(a), enemy.y + dist * Math.sin(a), Math.max(2, enemy.radius * 0.12 * (1 - p)), 0, Math.PI * 2);
-                ctx.fill();
-            }
-            ctx.restore();
-            return;
-        }
-
         ctx.save();
         ctx.beginPath();
-        const auraR = enemy.radius + 130 + Math.sin(timeFactor / 800) * 22 + Math.cos(timeFactor / 350) * 4;
+        
+        const isMenuPreview = (enemy as any).targetX === undefined;
+        const auraMaxPadding = isMenuPreview ? 16 : 130;
+        const waveStrength = isMenuPreview ? 3 : 22;
+        const rippleStrength = isMenuPreview ? 1 : 4;
+        
+        const auraR = enemy.radius + auraMaxPadding + Math.sin(timeFactor / 800) * waveStrength + Math.cos(timeFactor / 350) * rippleStrength;
+        
         ctx.arc(enemy.x, enemy.y, auraR, 0, Math.PI * 2);
         const gradient = ctx.createRadialGradient(enemy.x, enemy.y, enemy.radius * 0.3, enemy.x, enemy.y, auraR);
         gradient.addColorStop(0, 'rgba(0, 230, 115, 0.22)'); 
@@ -151,7 +156,7 @@ export class FloaterEnemy {
         ctx.fillStyle = '#00E673'; 
         ctx.fill();
         ctx.strokeStyle = '#007e3f';
-        ctx.lineWidth = 5 + Math.sin(timeFactor / 800); 
+        ctx.lineWidth = isMenuPreview ? 2.5 : 5 + Math.sin(timeFactor / 800) * 1.5; 
         ctx.stroke();
         ctx.restore();
     }
